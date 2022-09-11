@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: weekend-api-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: 'true'
+  labels:
+    name: weekend-api-ingress
+spec:
+  rules:
+  - host: weekendapi.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /?(.*)
+        backend:
+          service:
+            name: weekend-api-service
+            port: 
+              number: 8080

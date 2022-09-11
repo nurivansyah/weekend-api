@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weekend-api-deployment
+  labels:
+    app: weekend-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: weekend-api
+  template:
+    metadata:
+      labels:
+        app: weekend-api
+    spec:
+      containers:
+      - name: weekend-api-container
+        image: weekend-api:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: weekend-api-configmap
+        - secretRef:
+            name: weekend-api-secret
