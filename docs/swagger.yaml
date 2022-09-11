@@ -1,0 +1,408 @@
+definitions:
+  dto.CreateUserRequest:
+    properties:
+      password:
+        maxLength: 15
+        minLength: 4
+        type: string
+      user_type:
+        type: string
+      username:
+        maxLength: 15
+        minLength: 4
+        type: string
+    required:
+    - password
+    - user_type
+    - username
+    type: object
+  dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  dto.JWT:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  dto.LoginRequest:
+    properties:
+      password:
+        maxLength: 15
+        minLength: 4
+        type: string
+      username:
+        maxLength: 15
+        minLength: 4
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dto.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  dto.RenewTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  dto.SignUpRequest:
+    properties:
+      password:
+        maxLength: 15
+        minLength: 4
+        type: string
+      username:
+        maxLength: 15
+        minLength: 4
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dto.UpdateUserRequest:
+    properties:
+      password:
+        maxLength: 15
+        minLength: 4
+        type: string
+      user_type:
+        type: string
+      username:
+        maxLength: 15
+        minLength: 4
+        type: string
+    type: object
+  dto.UserProfile:
+    properties:
+      user:
+        $ref: '#/definitions/dto.UserSession'
+    type: object
+  dto.UserSession:
+    properties:
+      id:
+        type: integer
+      user_type:
+        type: string
+      username:
+        type: string
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      user_type:
+        type: string
+      username:
+        type: string
+    required:
+    - user_type
+    - username
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and provides access_token and refresh_token
+        to Authorize API calls
+      operationId: Login
+      parameters:
+      - description: User Login
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.JWT'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Login
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates refresh_token and generates new access_token and
+        refresh_token to Authorize API calls
+      operationId: RenewToken
+      parameters:
+      - description: Renew Access Token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RenewTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.JWT'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+      summary: Renew Token
+      tags:
+      - Auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Register a user to access API
+      operationId: Signup
+      parameters:
+      - description: User SignUp
+        in: body
+        name: signup
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SignUpRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: SignUp
+      tags:
+      - Auth
+  /profile:
+    get:
+      consumes:
+      - application/json
+      description: Get authenticated user data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserProfile'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+      security:
+      - bearerAuth: []
+      summary: Retrieve Profile Data
+      tags:
+      - Auth
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get all the existing users (require authenticated and admin level
+        to call this resource)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Retrieve list of User
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user (require authenticated and admin level to call
+        this resource)
+      parameters:
+      - description: Create user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Create User
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a single user (require authenticated and admin level to
+        call this resource)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Delete User
+      tags:
+      - Users
+    get:
+      consumes:
+      - application/json
+      description: Show a single user (require authenticated and admin level to call
+        this resource)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Retrieve User
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update a single user (require authenticated and admin level to
+        call this resource)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Update User
+      tags:
+      - Users
+securityDefinitions:
+  bearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
