@@ -1,0 +1,20 @@
+version: "3.9"
+services:
+  weekend-api:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: weekend-api:latest
+    ports:
+      - "8080:8080"
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      - GIN_MODE=release
+      - APP_ENV=production
+    networks:
+      - weekend-api
+
+networks:
+  weekend-api:
